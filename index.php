@@ -20,7 +20,7 @@ require_once 'dbconnect.php';
 
     <?php
     try {
-        // Выполняем запрос к таблице forums (из твоей схемы)
+        // Выполняем запрос к таблице forums 
         $stmt = $pdo->query("SELECT name, description, topic_count FROM forums ORDER BY name");
         
         while ($row = $stmt->fetch()) {
