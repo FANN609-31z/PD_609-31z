@@ -1,38 +1,39 @@
 <?php
-require_once 'db.php'; 
+// Подключаем наш единый файл БД
+require_once 'dbconnect.php';
 
-try {
-    // Получаем все категории, отсортированные по порядку
-    $query = "SELECT * FROM categories ORDER BY sort_order ASC";
-    $stmt = $pdo->query($query);
-    $categories = $stmt->fetchAll();
-
-    foreach ($categories as $category) {
-        echo "<div style='border: 1px solid #ccc; margin-bottom: 20px; padding: 10px; border-radius: 5px;'>";
-        echo "<h1>" . htmlspecialchars($category['name']) . "</h1>";
-        echo "<p><i>" . htmlspecialchars($category['description']) . "</i></p>";
-
-        // Вложенный запрос: получаем форумы для этой категории
-        $forumStmt = $pdo->prepare("SELECT * FROM forums WHERE category_id = ? ORDER BY sort_order ASC");
-        $forumStmt->execute([$category['id']]);
-        $forums = $forumStmt->fetchAll();
-
-        if ($forums) {
-            echo "<ul>";
-            foreach ($forums as $forum) {
-                echo "<li>";
-                echo "<strong>" . htmlspecialchars($forum['name']) . "</strong> — ";
-                echo "Тем: " . $forum['topic_count'] . " | Сообщений: " . $forum['post_count'];
-                echo "</li>";
-            }
-            echo "</ul>";
-        } else {
-            echo "<p>В этой категории пока нет разделов.</p>";
-        }
-        
-        echo "</div>";
-    }
-} catch (PDOException $e) {
-    echo "Ошибка при выборке данных: " . $e->getMessage();
-}
 ?>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Панель управления форумом</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; padding: 20px; }
+        .item { border-bottom: 1px solid #eee; padding: 10px 0; }
+        h1 { color: #333; }
+    </style>
+</head>
+<body>
+
+    <h1>Список форумов</h1>
+
+    <?php
+    try {
+        // Выполняем запрос к таблице forums (из твоей схемы)
+        $stmt = $pdo->query("SELECT name, description, topic_count FROM forums ORDER BY name");
+        
+        while ($row = $stmt->fetch()) {
+            echo "<div class='item'>";
+            echo "<strong>" . htmlspecialchars($row['name']) . "</strong><br>";
+            echo "<i>" . htmlspecialchars($row['description']) . "</i><br>";
+            echo "Тем в разделе: " . $row['topic_count'];
+            echo "</div>";
+        }
+    } catch (PDOException $e) {
+        echo "Ошибка запроса: " . $e->getMessage();
+    }
+    ?>
+
+</body>
+</html>
